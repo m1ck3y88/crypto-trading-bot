@@ -1,6 +1,8 @@
 import tkinter as tk
 import logging
 
+from coinbasepro_products import get_products
+
 
 logger = logging.getLogger()
 
@@ -20,6 +22,25 @@ logger.addHandler(file_handler)
 
 
 if __name__ == '__main__':
-    logger.info("This is logged only if we execute the main.py file")
+
+    coinbase_products = get_products()
+
     root = tk.Tk()
+    root.configure(bg='gray12')
+
+    i = 0
+    j = 0
+
+    calibri_font = ("Calibri", 11, "normal")
+
+    for product in coinbase_products:
+        label_widget = tk.Label(root, text=product, bg='gray12', fg='SteelBlue1', width=13)
+        label_widget.grid(row=i, column=j, sticky='ew')
+
+        if i == 4:
+            j += 1
+            i = 0
+        else:
+            i += 1
+
     root.mainloop()
