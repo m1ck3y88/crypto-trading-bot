@@ -1,7 +1,7 @@
 import tkinter as tk
 import logging
 
-from coinbasepro_products import get_products
+from coinbasepro_products import get_sandbox_products, get_sandbox_accounts, TestWebsocketClient
 
 
 logger = logging.getLogger()
@@ -23,7 +23,7 @@ logger.addHandler(file_handler)
 
 if __name__ == '__main__':
 
-    coinbase_products = get_products()
+    sandbox_products = get_sandbox_products()
 
     root = tk.Tk()
     root.configure(bg='gray12')
@@ -33,7 +33,7 @@ if __name__ == '__main__':
 
     calibri_font = ("Calibri", 11, "normal")
 
-    for product in coinbase_products:
+    for product in sandbox_products:
         label_widget = tk.Label(root, text=product, bg='gray12', fg='SteelBlue1', width=13)
         label_widget.grid(row=i, column=j, sticky='ew')
 
