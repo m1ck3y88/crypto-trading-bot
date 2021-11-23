@@ -17,6 +17,7 @@ class CoinbaseProWebsocketClient(cbpro.WebsocketClient):
 
     def on_open(self):
         self.url = 'wss://ws-feed.pro.coinbase.com'
+        self.message_count = 0
 
     def _set_update_function(self):
         # print(type(self.datastream))
