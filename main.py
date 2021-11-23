@@ -1,8 +1,7 @@
 import tkinter as tk
 import logging
 
-from coinbasepro_products import get_sandbox_products, get_sandbox_accounts, TestWebsocketClient
-
+from connectors.coinbasepro_products import get_sandbox_products, get_wallet_balance, TestWebsocketClient
 
 logger = logging.getLogger()
 
@@ -20,10 +19,16 @@ file_handler.setLevel(logging.DEBUG)
 logger.addHandler(stream_handler)
 logger.addHandler(file_handler)
 
-
 if __name__ == '__main__':
 
     sandbox_products = get_sandbox_products()
+    sandbox_wallets = get_wallet_balance()
+
+    for product in sandbox_products:
+        print(product)
+
+    for wallet in sandbox_wallets:
+        print(wallet)
 
     root = tk.Tk()
     root.configure(bg='gray12')
