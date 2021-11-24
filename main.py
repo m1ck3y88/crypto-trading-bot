@@ -23,13 +23,19 @@ logger.addHandler(file_handler)
 if __name__ == '__main__':
 
     sandbox_products = get_sandbox_products()
-    sandbox_wallets = get_sandbo()
+    sandbox_wallets = get_sandbox_accounts()
+    live_wallets = get_live_accounts()
 
-    for product in sandbox_products:
-        print(product)
+    # for product in sandbox_products:
+    #     print(product)
+    #
+    # for wallet in sandbox_wallets:
+    #     print(wallet)
 
-    for wallet in sandbox_wallets:
-        print(wallet)
+    # for wallet in live_wallets:
+    #     if wallet['currency'] == 'JASMY':
+    #         jasmy_wallet = wallet
+    #         print(jasmy_wallet)
 
     # root = tk.Tk()
     # root.configure(bg='gray12')

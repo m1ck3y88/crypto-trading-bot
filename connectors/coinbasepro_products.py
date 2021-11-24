@@ -1,20 +1,20 @@
 import logging
 import cbpro
 from env.api_key import *
-import pandas as pd
-import talib as ta  # performs technical analysis on pandas Series or numpy arrays
-import streamz
-from streamz import Stream
-from streamz.dataframe import DataFrame
-import holoviews as hv
-from holoviews import opts
-from holoviews.streams import Buffer
-from holoviews.plotting.links import RangeToolLink
-from bokeh.models.tools import HoverTool
+# import pandas as pd
+# import talib as ta  # performs technical analysis on pandas Series or numpy arrays
+# import streamz
+# from streamz import Stream
+# from streamz.dataframe import DataFrame
+# import holoviews as hv
+# from holoviews import opts
+# from holoviews.streams import Buffer
+# from holoviews.plotting.links import RangeToolLink
+# from bokeh.models.tools import HoverTool
 
-hv.extension('bokeh')
+# hv.extension('bokeh')
 
-from clients import CoinbaseProWebsocketClient
+# from clients import CoinbaseProWebsocketClient
 
 logger = logging.getLogger()
 
@@ -67,40 +67,41 @@ def get_live_accounts():
 #     if account['currency'] == 'JASMY':
 #         print(account)
 
-def compute_rsi(emitted_vals):
-    # assumes emitted_vals is a list of pandas Dataframes
-    master_df = pd.concat([df for df in emitted_vals])
-
-    rsi_series = ta.RSI(master_df['price'])
-
-    rsi_val = rsi_series[-1]
-    t_val = master_df.index[-1]
-    return pd.DataFrame({'timestamp': [t_val], 'rsi': [rsi_val]}).set_index('timestamp', drop=True)
-
-
-source = Stream()
-
-sample_df = pd.DataFrame({'timestamp': [], 'price': []}).set_index('timestamp', drop=True)
-sdf = DataFrame(source, example=sample_df)
-
-sample_rsi_df = pd.DataFrame({'timestamp': [], 'rsi': []}).set_index('timestamp', drop=True)
-rsi_buffer = Buffer(sample_rsi_df, length=100)
-rsi_stream = Stream(
-    upstream=source
-).sliding_window(
-    15,
-    return_partial=False
-).map(
-    compute_rsi
-).sink(
-    rsi_buffer.send
-)
-
-product_to_stream = 'BTC-USD'
-socket_stream = CoinbaseProWebsocketClient(sdf, products=['BTC-USD'], channels=['ticker'])
-
-socket_stream.start()
-
+# def compute_rsi(emitted_vals):
+#     # assumes emitted_vals is a list of pandas Dataframes
+#     master_df = pd.concat([df for df in emitted_vals])
+#
+#     rsi_series = ta.RSI(master_df['price'])
+#
+#     rsi_val = rsi_series[-1]
+#     t_val = master_df.index[-1]
+#     return pd.DataFrame({'timestamp': [t_val], 'rsi': [rsi_val]}).set_index('timestamp', drop=True)
+#
+#
+# source = Stream()
+#
+# sample_df = pd.DataFrame({'timestamp': [], 'price': []}).set_index('timestamp', drop=True)
+# sdf = DataFrame(source, example=sample_df)
+#
+# sample_rsi_df = pd.DataFrame({'timestamp': [], 'rsi': []}).set_index('timestamp', drop=True)
+# rsi_buffer = Buffer(sample_rsi_df, length=100)
+# rsi_stream = Stream(
+#     upstream=source
+# ).sliding_window(
+#     15,
+#     return_partial=False
+# ).map(
+#     compute_rsi
+# ).sink(
+#     rsi_buffer.send
+# )
+#
+# product_to_stream = 'BTC-USD'
+# socket_stream = CoinbaseProWebsocketClient(sdf, products=['BTC-USD'], channels=['ticker'])
+#
+# socket_stream.start()
+#
+# # Define some interactivity tools for the graph
 # hover = HoverTool(
 #     tooltips=[
 #         ('time', '@timestamp{%H:%M:%S'),
