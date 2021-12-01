@@ -48,8 +48,9 @@ if __name__ == '__main__':
                 if asset['currency'] == coin and (float(asset['balance']) >= 1):
                     print('Selling ' + coin + '!')
                     print(coin + ' Available: ' + asset['balance'])
-                    coin_cur = asset
-                    auth_client.place_market_order(product_id=asset_id, side='sell', funds=asset['balance'])
+                    coin_cur = '{:.2}'.format(asset['balance'])
+                    auth_client.place_market_order(product_id=asset_id, side='sell', funds=coin_cur)
+                    # buy_price = float(auth_client.get_product_ticker(product_id=asset_id)['price'])
 
         else:
             print('Nothing yet...')
