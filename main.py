@@ -37,24 +37,22 @@ if __name__ == '__main__':
         price = float(auth_client.get_product_ticker(product_id=asset_id)['price'])
         if price <= buy_price:
             for wallet in get_live_accounts():
-                if wallet['currency'] == cur and (float(wallet['balance']) >= 5):
+                if wallet['currency'] == cur and (float(wallet['balance']) >= 1):
                     print('Buying ' + coin + '!')
-                    print(cur + ' Available: ' + wallet['balance'])
-                    fiat_cur = '{:.2}'.format(wallet['balance'])
+                    fiat_cur = '{:.2f}'.format(float(wallet['balance']))
+                    print(cur + ' Available: ' + fiat_cur)
                     auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
 
-        elif price >= sell_price or price >= (buy_price * 1.025):
+        elif price >= sell_price or price >= (buy_price * 1.10):
             for asset in get_live_accounts():
-                if asset['currency'] == coin and (float(asset['balance']) >= 1):
+                if asset['currency'] == coin and (float(asset['balance']) >= 0.9):
                     print('Selling ' + coin + '!')
-                    print(coin + ' Available: ' + asset['balance'])
-                    coin_cur = '{:.2}'.format(asset['balance'])
+                    coin_cur = '{:.2f}'.format(float(asset['balance']))
                     auth_client.place_market_order(product_id=asset_id, side='sell', funds=coin_cur)
-                    # buy_price = float(auth_client.get_product_ticker(product_id=asset_id)['price'])
 
         else:
             print('Nothing yet...')
-        time.sleep(5)
+        time.sleep(10)
 
     # Sandbox Account Algorithm:
     # sb_cur = 'USD'
@@ -73,15 +71,15 @@ if __name__ == '__main__':
     #         for sb_wallet in get_sandbox_accounts():
     #             if sb_wallet['currency'] == sb_cur and (float(sb_wallet['balance']) >= 10):
     #                 print('Buying ' + sb_coin + '!')
-    #                 print(sb_cur + ' Available: ' + sb_wallet['balance'])
-    #                 sb_fiat_cur = '{:.2}'.format(sb_wallet['balance'])
-    #                 auth_client.place_market_order(product_id=sb_asset_id, side='buy', funds=sb_fiat_cur)
+    #                 sb_fiat_cur = '{:.2}'.format(float(sb_wallet['balance']))
+    #                 print(sb_cur + ' Available: ' + sb_fiat_cur)
+    #                 auth_sandbox_client.place_market_order(product_id=sb_asset_id, side='buy', funds=sb_fiat_cur)
     #     elif sb_price >= sb_sell_price or sb_price <= (sb_buy_price * 1.01):
     #         for sb_asset in get_sandbox_accounts():
     #             if sb_asset['currency'] == sb_coin and (float(sb_asset['balance']) >= 5):
     #                 print('Selling ' + sb_coin + '!')
-    #                 print(sb_coin + ' Available: ' + sb_asset['balance'])
-    #                 sb_coin_cur = '{:.2}'.format(sb_asset['balance'])
+    #                 sb_coin_cur = '{:.2f}'.format(float(sb_asset['balance']))
+    #                 print(sb_coin + ' Available: ' + sb_coin_cur)
     #                 auth_sandbox_client.place_market_order(product_id=sb_asset_id, side='sell', funds=sb_coin_cur)
     #
     #     else:
