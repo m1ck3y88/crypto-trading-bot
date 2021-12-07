@@ -3,6 +3,7 @@ import cbpro
 
 from connectors.coinbasepro_products import *
 import time
+import math
 
 logger = logging.getLogger()
 
@@ -39,20 +40,21 @@ if __name__ == '__main__':
             for wallet in get_live_accounts():
                 if wallet['currency'] == cur and (float(wallet['balance']) >= 1):
                     print('Buying ' + coin + '!')
-                    fiat_cur = '{:.2f}'.format(float(wallet['balance']))
-                    print(cur + ' Available: ' + fiat_cur)
+                    fiat_cur = '{:.2f}'.format(math.floor(float(wallet['balance'])))
+                    print(cur + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
                     auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
 
         elif price >= sell_price or price >= (buy_price * 1.10):
             for asset in get_live_accounts():
-                if asset['currency'] == coin and (float(asset['balance']) >= 0.9):
+                if asset['currency'] == coin and (float(asset['balance']) >= 0.01):
                     print('Selling ' + coin + '!')
                     coin_cur = '{:.2f}'.format(float(asset['balance']))
+                    print(coin + ' Available: ' + coin_cur)
                     auth_client.place_market_order(product_id=asset_id, side='sell', funds=coin_cur)
 
         else:
             print('Nothing yet...')
-        time.sleep(10)
+        time.sleep(2)
 
     # Sandbox Account Algorithm:
     # sb_cur = 'USD'
