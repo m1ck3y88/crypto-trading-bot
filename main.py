@@ -22,9 +22,6 @@ logger.addHandler(file_handler)
 
 if __name__ == '__main__':
 
-    # fills = auth_client.get_fills(product_id="LRC-USD")
-    # print(next(fills))
-
     # Live Account Algorithm
     cur = 'USD'
     buy_price = float(input("Please enter the buy price: "))
@@ -48,9 +45,9 @@ if __name__ == '__main__':
                     print(cur + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
                     auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
 
-        elif price >= sell_price or price >= buy_price * 1.10:
+        elif price >= sell_price or price >= buy_price * 1.20:
             for asset in get_live_accounts():
-                if asset['currency'] == coin and float(asset['balance']) >= 1:
+                if asset['currency'] == coin and float(asset['balance']) >= 0.3:
                     print('Selling ' + coin + '!')
                     # '{:.2f}'.format(math.floor(float(asset['balance'])))
                     # '{:.2f}'.format(float(asset['balance']))
@@ -60,7 +57,7 @@ if __name__ == '__main__':
 
         else:
             print('Nothing yet...')
-        time.sleep(10)
+        time.sleep(30)
 
     # Sandbox Account Algorithm:
     # sb_cur = 'USD'
