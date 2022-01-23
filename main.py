@@ -4,21 +4,21 @@ from connectors.coinbasepro_products import *
 import time
 import math
 
-logger = logging.getLogger()
-
-logger.setLevel(logging.INFO)
-
-stream_handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s %(levelname)s :: %(message)s')
-stream_handler.setFormatter(formatter)
-stream_handler.setLevel(logging.INFO)
-
-file_handler = logging.FileHandler('info.log')
-file_handler.setFormatter(formatter)
-file_handler.setLevel(logging.DEBUG)
-
-logger.addHandler(stream_handler)
-logger.addHandler(file_handler)
+# logger = logging.getLogger()
+#
+# logger.setLevel(logging.INFO)
+#
+# stream_handler = logging.StreamHandler()
+# formatter = logging.Formatter('%(asctime)s %(levelname)s :: %(message)s')
+# stream_handler.setFormatter(formatter)
+# stream_handler.setLevel(logging.INFO)
+#
+# file_handler = logging.FileHandler('info.log')
+# file_handler.setFormatter(formatter)
+# file_handler.setLevel(logging.DEBUG)
+#
+# logger.addHandler(stream_handler)
+# logger.addHandler(file_handler)
 
 if __name__ == '__main__':
 
@@ -32,6 +32,13 @@ if __name__ == '__main__':
     asset_id = input("Please enter the asset you want to invest in\n"
                      "using the following format: asset-currency\n"
                      "Example: BTC-USD\n").upper()
+    min_currency_bal = float(input("Please enter minimum balance of your\n"
+                                   "native currency you choose to have in order to trade: "))
+    min_asset_bal = float(input("Please enter minimum balance of your asset (cryptocurrency)\n"
+                                "you choose to have in order to trade: "))
+    delay = int(input("Please enter the number of seconds you choose to wait before checking\n"
+                      "to buy/sell again: "))
+    count = 0
     # filled_buy_price = float(input("Set this to a high number that you know the asset\n"
     #                                "you're investing in most likely won't reach"))
 
@@ -39,16 +46,28 @@ if __name__ == '__main__':
         price = float(auth_client.get_product_ticker(product_id=asset_id)['price'])
         if price <= buy_price:
             for wallet in get_live_accounts():
-                if wallet['currency'] == cur and float(wallet['balance']) >= 1:
+                if wallet['currency'] == cur and float(wallet['balance']) >= min_currency_bal:
                     print('Buying ' + coin + '!')
                     fiat_cur = '{:.2f}'.format(math.floor(float(wallet['balance'])))
                     print(cur + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
                     auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
+                else:
+                    if wallet['currency'] == coin:
+                        if count == 0:
+                            print('Your\'re already invested in ' + coin + '!')
+                            print(coin + ' Available Balance: ' + '{:.2f}'.format(float(wallet['balance'])))
+                            print(f'Checking again in {str(delay)} seconds...')
+                            print('---------------------------------------------\n')
+                            count += 1
+                        else:
+                            print('The market is trending downwards')
+                            print(f'Checking again in {str(delay)} seconds...')
+                            print('---------------------------------------------\n')
 
-        elif price >= sell_price or price >= buy_price * 1.20:
+        elif price >= sell_price or price >= buy_price * 1.50:
             for asset in get_live_accounts():
-                if asset['currency'] == coin and float(asset['balance']) >= 0.3:
-                    print('Selling ' + coin + '!')
+                if asset['currency'] == coin and float(asset['balance']) >= min_asset_bal:
+                    print('You made a profit! Selling ' + coin + '!')
                     # '{:.2f}'.format(math.floor(float(asset['balance'])))
                     # '{:.2f}'.format(float(asset['balance']))
                     coin_cur = asset['balance']
@@ -56,8 +75,11 @@ if __name__ == '__main__':
                     auth_client.place_market_order(product_id=asset_id, side='sell', size=coin_cur)
 
         else:
-            print('Nothing yet...')
-        time.sleep(30)
+            print('\nThe market is trending upwards but\n'
+                  'hasn\'t reached your target sell price yet')
+            print(f'Checking again in {str(delay)} seconds...')
+            print('---------------------------------------------\n')
+        time.sleep(delay)
 
     # Sandbox Account Algorithm:
     # sb_cur = 'USD'
