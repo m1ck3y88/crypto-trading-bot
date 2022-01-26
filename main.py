@@ -76,7 +76,9 @@ if __name__ == '__main__':
 
         else:
             print('\nThe market is trending upwards but\n'
-                  'hasn\'t reached your target sell price yet')
+                  'you either haven\'t bought in yet or you\'ve\n'
+                  'bought in and the market price hasn\'t reached\n'
+                  'your target sell price yet')
             print(f'Checking again in {str(delay)} seconds...')
             print('---------------------------------------------\n')
         time.sleep(delay)
