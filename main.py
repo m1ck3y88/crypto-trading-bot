@@ -52,16 +52,22 @@ if __name__ == '__main__':
                     print(cur + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
                     auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
                 else:
-                    if wallet['currency'] == coin:
+                    if wallet['currency'] == coin and float(wallet['balance']) >= min_asset_bal:
                         if count == 0:
                             print('Your\'re already invested in ' + coin + '!')
-                            print(coin + ' Available Balance: ' + '{:.2f}'.format(float(wallet['balance'])))
-                            print(f'Checking again in {str(delay)} seconds...')
+                            print(coin + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
+                            if delay == 1:
+                                print(f'Checking again in {str(delay)} second...')
+                            else:
+                                print(f'Checking again in {str(delay)} seconds...')
                             print('---------------------------------------------\n')
                             count += 1
                         else:
                             print('The market is trending downwards')
-                            print(f'Checking again in {str(delay)} seconds...')
+                            if delay == 1:
+                                print(f'Checking again in {str(delay)} second...')
+                            else:
+                                print(f'Checking again in {str(delay)} seconds...')
                             print('---------------------------------------------\n')
 
         elif price >= sell_price or price >= buy_price * 1.50:
@@ -73,13 +79,26 @@ if __name__ == '__main__':
                     coin_cur = asset['balance']
                     print(coin + ' Available: ' + coin_cur)
                     auth_client.place_market_order(product_id=asset_id, side='sell', size=coin_cur)
+                else:
+                    if asset['currency'] == cur and float(asset['balance']) >= min_currency_bal:
+                        print('You\'ve already made a profit\n'
+                              'and are waiting to buy back in')
+                        print(cur + ' Available: ' + '{:.2f}'.format(float(asset['balance'])))
+                        if delay == 1:
+                            print(f'Checking again in {str(delay)} second...')
+                        else:
+                            print(f'Checking again in {str(delay)} seconds...')
+                        print('---------------------------------------------\n')
 
         else:
             print('\nThe market is trending upwards but\n'
                   'you either haven\'t bought in yet or you\'ve\n'
                   'bought in and the market price hasn\'t reached\n'
                   'your target sell price yet')
-            print(f'Checking again in {str(delay)} seconds...')
+            if delay == 1:
+                print(f'Checking again in {str(delay)} second...')
+            else:
+                print(f'Checking again in {str(delay)} seconds...')
             print('---------------------------------------------\n')
         time.sleep(delay)
 
