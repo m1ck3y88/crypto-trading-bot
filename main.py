@@ -51,6 +51,11 @@ if __name__ == '__main__':
                     fiat_cur = '{:.2f}'.format(math.floor(float(wallet['balance'])))
                     print(cur + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
                     auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
+                    if delay == 1:
+                        print(f'Checking again in {str(delay)} second...')
+                    else:
+                        print(f'Checking again in {str(delay)} seconds...')
+                    print('---------------------------------------------\n')
                 else:
                     if wallet['currency'] == coin and float(wallet['balance']) >= min_asset_bal:
                         if count == 0:
@@ -70,7 +75,7 @@ if __name__ == '__main__':
                                 print(f'Checking again in {str(delay)} seconds...')
                             print('---------------------------------------------\n')
 
-        elif price >= sell_price or price >= buy_price * 1.50:
+        elif price >= sell_price or price >= buy_price * 20:
             for asset in get_live_accounts():
                 if asset['currency'] == coin and float(asset['balance']) >= min_asset_bal:
                     print('You made a profit! Selling ' + coin + '!')
