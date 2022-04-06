@@ -22,7 +22,90 @@ import math
 
 if __name__ == '__main__':
 
-    # Live Account Algorithm
+    # Live Account Market Order Algorithm
+    # cur = 'USD'
+    # buy_price = float(input("Please enter the buy price: "))
+    # sell_price = float(input("Please enter the sell price: "))
+    # coin = input("Please enter the coin abbreviation for the coin\n"
+    #              "you are investing in\n"
+    #              "Example: BTC\n").upper()
+    # asset_id = input("Please enter the asset you want to invest in\n"
+    #                  "using the following format: asset-currency\n"
+    #                  "Example: BTC-USD\n").upper()
+    # min_currency_bal = float(input("Please enter minimum balance of your\n"
+    #                                "native currency you choose to have in order to trade: "))
+    # min_asset_bal = float(input("Please enter minimum balance of your asset (cryptocurrency)\n"
+    #                             "you choose to have in order to trade: "))
+    # delay = int(input("Please enter the number of seconds you choose to wait before checking\n"
+    #                   "to buy/sell again: "))
+    # count = 0
+
+    # while True:
+    #     price = float(auth_client.get_product_ticker(product_id=asset_id)['price'])
+    #     if price <= buy_price:
+    #         for wallet in get_live_accounts():
+    #             if wallet['currency'] == cur and float(wallet['balance']) >= min_currency_bal:
+    #                 print('Buying ' + coin + '!')
+    #                 fiat_cur = '{:.2f}'.format(math.floor(float(wallet['balance'])))
+    #                 print(cur + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
+    #                 auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
+    #                 if delay == 1:
+    #                     print(f'Checking again in {str(delay)} second...')
+    #                 else:
+    #                     print(f'Checking again in {str(delay)} seconds...')
+    #                 print('---------------------------------------------\n')
+    #             else:
+    #                 if wallet['currency'] == coin and float(wallet['balance']) >= min_asset_bal:
+    #                     if count == 0:
+    #                         print('Your\'re already invested in ' + coin + '!')
+    #                         print(coin + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
+    #                         if delay == 1:
+    #                             print(f'Checking again in {str(delay)} second...')
+    #                         else:
+    #                             print(f'Checking again in {str(delay)} seconds...')
+    #                         print('---------------------------------------------\n')
+    #                         count += 1
+    #                     else:
+    #                         print('The market is trending downwards')
+    #                         if delay == 1:
+    #                             print(f'Checking again in {str(delay)} second...')
+    #                         else:
+    #                             print(f'Checking again in {str(delay)} seconds...')
+    #                         print('---------------------------------------------\n')
+    #
+    #     elif price >= sell_price or price >= buy_price * 20:
+    #         for asset in get_live_accounts():
+    #             if asset['currency'] == coin and float(asset['balance']) >= min_asset_bal:
+    #                 print('You made a profit! Selling ' + coin + '!')
+    #                 # '{:.2f}'.format(math.floor(float(asset['balance'])))
+    #                 # '{:.2f}'.format(float(asset['balance']))
+    #                 coin_cur = asset['balance']
+    #                 print(coin + ' Available: ' + coin_cur)
+    #                 auth_client.place_market_order(product_id=asset_id, side='sell', size=coin_cur)
+    #             else:
+    #                 if asset['currency'] == cur and float(asset['balance']) >= min_currency_bal:
+    #                     print('You\'ve already made a profit\n'
+    #                           'and are waiting to buy back in')
+    #                     print(cur + ' Available: ' + '{:.2f}'.format(float(asset['balance'])))
+    #                     if delay == 1:
+    #                         print(f'Checking again in {str(delay)} second...')
+    #                     else:
+    #                         print(f'Checking again in {str(delay)} seconds...')
+    #                     print('---------------------------------------------\n')
+    #
+    #     else:
+    #         print('\nThe market is trending upwards but\n'
+    #               'you either haven\'t bought in yet or you\'ve\n'
+    #               'bought in and the market price hasn\'t reached\n'
+    #               'your target sell price yet')
+    #         if delay == 1:
+    #             print(f'Checking again in {str(delay)} second...')
+    #         else:
+    #             print(f'Checking again in {str(delay)} seconds...')
+    #         print('---------------------------------------------\n')
+    #     time.sleep(delay)
+
+    # Live Account Market/Limit Order Algorithm
     cur = 'USD'
     buy_price = float(input("Please enter the buy price: "))
     sell_price = float(input("Please enter the sell price: "))
@@ -36,11 +119,11 @@ if __name__ == '__main__':
                                    "native currency you choose to have in order to trade: "))
     min_asset_bal = float(input("Please enter minimum balance of your asset (cryptocurrency)\n"
                                 "you choose to have in order to trade: "))
+    lmttbuy_asst_amnt = float(input("Please enter the amount of the asset\n"
+                                    "you want to purchase: "))
     delay = int(input("Please enter the number of seconds you choose to wait before checking\n"
                       "to buy/sell again: "))
     count = 0
-    # filled_buy_price = float(input("Set this to a high number that you know the asset\n"
-    #                                "you're investing in most likely won't reach"))
 
     while True:
         price = float(auth_client.get_product_ticker(product_id=asset_id)['price'])
@@ -50,7 +133,8 @@ if __name__ == '__main__':
                     print('Buying ' + coin + '!')
                     fiat_cur = '{:.2f}'.format(math.floor(float(wallet['balance'])))
                     print(cur + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
-                    auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
+                    auth_client.place_limit_order(product_id=asset_id, side='buy', price=str(buy_price), size=str(lmttbuy_asst_amnt))
+                    # auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
                     if delay == 1:
                         print(f'Checking again in {str(delay)} second...')
                     else:
@@ -83,7 +167,7 @@ if __name__ == '__main__':
                     # '{:.2f}'.format(float(asset['balance']))
                     coin_cur = asset['balance']
                     print(coin + ' Available: ' + coin_cur)
-                    auth_client.place_market_order(product_id=asset_id, side='sell', size=coin_cur)
+                    auth_client.place_limit_order(product_id=asset_id, side='sell', price=str(sell_price), size=coin_cur)
                 else:
                     if asset['currency'] == cur and float(asset['balance']) >= min_currency_bal:
                         print('You\'ve already made a profit\n'
