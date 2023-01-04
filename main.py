@@ -49,15 +49,26 @@ if __name__ == '__main__':
             for wallet in get_live_accounts():
                 if wallet['currency'] == cur and float(wallet['balance']) >= min_currency_bal:
                     print('Buying ' + coin + '!')
-                    fiat_cur = '{:.8f}'.format((float(wallet['balance']) / price) -
-                                               ((float(wallet['balance']) / price) * 0.004))
-                    # lmtbuy_asst_amnt = '{:.2f}'.format(math.floor(float(fiat_cur)/buy_price))
-                    # print('Currency balance converted to cryptocurrency: ' + lmtbuy_asst_amnt)
+                    # For Cryptocurrency Worth Less Than a Dollar
+                    fiat_cur = '{:.2f}'.format(int((float(wallet['balance']) / price) -
+                                               ((float(wallet['balance']) / price) * 0.004)))
+                    # For Cryptocurrency Worth More Than a Dollar
+                    # fiat_cur = '{:.3f}'.format((float(wallet['balance']) / price) -
+                    #                                ((float(wallet['balance']) / price) * 0.004))
+                    # For Coins That Don't Allow Decimal Purchases (i.e. SHIBA)
+                    # fiat_cur = str(int((float(wallet['balance']) / price) -
+                    #                                ((float(wallet['balance']) / price) * 0.004)))
+                    # For Market Buy Orders
+                    # fiat_cur = '{:.2f}'.format(math.floor(float(wallet['balance'])))
+                    # print(fiat_cur)
                     print(cur + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
+                    # Limit Buy Order (Max)
                     auth_client.place_limit_order(product_id=asset_id, side='buy', price=str(price),
                                                   size=fiat_cur)
+                    # Limit Buy Order (Choose Amount of Cryptocurrency You Want to Buy)
                     # auth_client.place_limit_order(product_id=asset_id, side='buy', price=str(price),
                     #                               size=str(lmtbuy_asst_amnt))
+                    # Market Buy Order
                     # auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
                     if delay == 1:
                         print(f'Checking again in {str(delay)} second...')
@@ -87,13 +98,14 @@ if __name__ == '__main__':
             for asset in get_live_accounts():
                 if asset['currency'] == coin and float(asset['balance']) >= min_asset_bal:
                     print('You made a profit! Selling ' + coin + '!')
-                    # '{:.2f}'.format(math.floor(float(asset['balance'])))
-                    # '{:.2f}'.format(float(asset['balance']))
                     coin_cur = asset['balance']
                     print(coin + ' Available: ' + coin_cur)
-                    # auth_client.place_limit_order(product_id=asset_id, side='sell', price=str(sell_price),
+                    # Limit Sell Order (Choose Amount of Cryptocurrency You Want to Buy)
+                    # auth_client.place_limit_order(product_id=asset_id, side='sell', price=str(price),
                     #                               size=str(lmttbuy_asst_amnt))
+                    # Limit Sell Order (Max)
                     auth_client.place_limit_order(product_id=asset_id, side='sell', price=str(price), size=coin_cur)
+                    # Market Sell Order
                     # auth_client.place_market_order(product_id=asset_id, side='sell', funds=coin_cur)
                 else:
                     if asset['currency'] == cur and float(asset['balance']) >= min_currency_bal:
@@ -145,6 +157,7 @@ if __name__ == '__main__':
     #         for wallet in get_sandbox_accounts():
     #             if wallet['currency'] == sb_cur and float(wallet['balance']) >= sb_min_currency_bal:
     #                 print('Buying ' + sb_coin + '!')
+    #                 # For Cryptocurrency Worth More Than a Dollar
     #                 fiat_cur = '{:.8f}'.format((float(wallet['balance']) / price) -
     #                                            ((float(wallet['balance']) / price) * 0.006))
     #                 print(wallet)
