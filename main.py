@@ -105,7 +105,7 @@ if __name__ == '__main__':
     #         print('---------------------------------------------\n')
     #     time.sleep(delay)
 
-    # Live Account Market/Limit Order Algorithm
+    # Live Account Limit Buy/Limit Sell Algorithm
     cur = 'USD'
     buy_price = float(input("Please enter the buy price: "))
     sell_price = float(input("Please enter the sell price: "))
@@ -129,12 +129,12 @@ if __name__ == '__main__':
         price = float(auth_client.get_product_ticker(product_id=asset_id)['price'])
         if price <= buy_price:
             for wallet in get_live_accounts():
+                print('Buying ' + coin + '!')
                 if wallet['currency'] == cur and float(wallet['balance']) >= min_currency_bal:
-                    print('Buying ' + coin + '!')
-                    fiat_cur = '{:.2f}'.format(math.floor(float(wallet['balance'])))
+                    # fiat_cur = '{:.2f}'.format(math.floor(float(wallet['balance'])))
                     print(cur + ' Available: ' + '{:.2f}'.format(float(wallet['balance'])))
-                    auth_client.place_limit_order(product_id=asset_id, side='buy', price=str(buy_price), size=str(lmttbuy_asst_amnt))
-                    # auth_client.place_market_order(product_id=asset_id, side='buy', funds=fiat_cur)
+                    # auth_client.place_limit_order(product_id=asset_id, side='buy', price=str(buy_price), size=str(lmttbuy_asst_amnt))
+                    auth_client.place_market_order(product_id=asset_id, side='buy', size=str(lmttbuy_asst_amnt))
                     if delay == 1:
                         print(f'Checking again in {str(delay)} second...')
                     else:
@@ -167,7 +167,8 @@ if __name__ == '__main__':
                     # '{:.2f}'.format(float(asset['balance']))
                     coin_cur = asset['balance']
                     print(coin + ' Available: ' + coin_cur)
-                    auth_client.place_limit_order(product_id=asset_id, side='sell', price=str(sell_price), size=coin_cur)
+                    auth_client.place_limit_order(product_id=asset_id, side='sell', price=str(sell_price), size=str(lmttbuy_asst_amnt))
+                    # auth_client.place_limit_order(product_id=asset_id, side='sell', price=str(sell_price), size=coin_cur)
                 else:
                     if asset['currency'] == cur and float(asset['balance']) >= min_currency_bal:
                         print('You\'ve already made a profit\n'

@@ -14,7 +14,7 @@ from env.api_key import *
 
 # hv.extension('bokeh')
 
-from clients import CoinbaseProWebsocketClient
+# from clients import CoinbaseProWebsocketClient
 
 logger = logging.getLogger()
 
