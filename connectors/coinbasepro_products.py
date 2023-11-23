@@ -1,131 +1,129 @@
-import logging
-import cbpro
 from env.api_key import *
-# import pandas as pd
-# import talib as ta  # performs technical analysis on pandas Series or numpy arrays
-# import streamz
-# from streamz import Stream
-# from streamz.dataframe import DataFrame
-# import holoviews as hv
-# from holoviews import opts
-# from holoviews.streams import Buffer
-# from holoviews.plotting.links import RangeToolLink
-# from bokeh.models.tools import HoverTool
 
-# hv.extension('bokeh')
-
-# from clients import CoinbaseProWebsocketClient
-
-logger = logging.getLogger()
-
-auth_sandbox_client = cbpro.AuthenticatedClient(sandbox_api_key, sandbox_api_secret, sandbox_api_pass,
-                                                api_url="https://api-public.sandbox.exchange.coinbase.com")
-
-auth_client = cbpro.AuthenticatedClient(api_key, api_secret, api_pass)
+class Side(Enum):
+    BUY = 1
+    SELL = 0
 
 
-def get_sandbox_products():
+class Method(Enum):
+    POST = 1
+    GET = 0
 
-    for product in auth_sandbox_client.get_products():
-        yield product['id']
-
-
-def get_sandbox_accounts():
-
-    for account in auth_sandbox_client.get_accounts():
-        yield account
+creds = load_api_credentials()
 
 
-def get_live_products():
-
-    for product in auth_client.get_products():
-        yield product['id']
+def generate_client_order_id():
+    return uuid.uuid4()
 
 
-def get_live_accounts():
+def coinbase_request(method, path, body):
+    conn = http.client.HTTPSConnection("api.coinbase.com")
+    timestamp = str(int(time.time()))
+    message = timestamp + method + path.split('?')[0] + str(body)
+    signature = hmac.new(creds[1].encode('utf-8'), message.encode('utf-8'), digestmod=hashlib.sha256).hexdigest()
 
-    for account in auth_client.get_accounts():
-        yield account
+    headers = {
+        "accept": "application/json",
+        "CB-ACCESS-KEY": creds[0],
+        "CB-ACCESS-SIGN": signature,
+        "CB-ACCESS-TIMESTAMP": timestamp
+    }
+
+    conn.request(method, path, body, headers)
+    res = conn.getresponse()
+    data = res.read()
+
+    # Check for Unauthorized status code (401)
+    if res.status == 401:
+        print("Error: Unauthorized. Please check your API key and secret.")
+        return None
+
+    try:
+        response_data = json.loads(data.decode("utf-8"))
+        print(json.dumps(response_data, indent=2))
+        return response_data
+    except json.JSONDecodeError:
+        print("Error: Unable to decode JSON response. Raw response data:", data)
+        return None
+
+def placeLimitOrder(side, pair, size, limit_price):
+    method = Method.POST.name
+    path = '/api/v3/brokerage/orders'
+    payload = json.dumps({
+        "client_order_id": str(generate_client_order_id()),
+        "side": side,
+        "product_id": pair,
+        "order_configuration": {
+            "limit_limit_gtc": {
+                "post_only": False,
+                "limit_price": limit_price,
+                "base_size": size
+            }
+        }
+    })
+
+    coinbase_request(method, path, payload)
+
+def placeStopOrder(side, pair, size, stop_price, limit_price):
+    method = Method.POST.name
+    path = '/api/v3/brokerage/orders'
+    payload = json.dumps({
+        "client_order_id": str(generate_client_order_id()),
+        "side": side,
+        "product_id": pair,
+        "order_configuration": {
+            "limit_limit_gtc": {
+                "post_only": False,
+                "stop_price": stop_price,
+                "limit_price": limit_price,
+                "base_size": size
+            }
+        }
+    })
+
+    coinbase_request(method, path, payload)
 
 
-# def compute_rsi(emitted_vals):
-#     # assumes emitted_vals is a list of pandas Dataframes
-#     master_df = pd.concat([df for df in emitted_vals])
-#
-#     rsi_series = ta.RSI(master_df['price'])
-#
-#     rsi_val = rsi_series[-1]
-#     t_val = master_df.index[-1]
-#     return pd.DataFrame({'timestamp': [t_val], 'rsi': [rsi_val]}).set_index('timestamp', drop=True)
-#
-#
-# source = Stream()
-#
-# sample_df = pd.DataFrame({'timestamp': [], 'price': []}).set_index('timestamp', drop=True)
-# sdf = DataFrame(source, example=sample_df)
-#
-# sample_rsi_df = pd.DataFrame({'timestamp': [], 'rsi': []}).set_index('timestamp', drop=True)
-# rsi_buffer = Buffer(sample_rsi_df, length=100)
-# rsi_stream = Stream(
-#     upstream=source
-# ).sliding_window(
-#     15,
-#     return_partial=False
-# ).map(
-#     compute_rsi
-# ).sink(
-#     rsi_buffer.send
-# )
-#
-# product_to_stream = 'BTC-USD'
-# socket_stream = CoinbaseProWebsocketClient(sdf, products=['BTC-USD'], channels=['ticker'])
-#
-# socket_stream.start()
-#
-# # Define some interactivity tools for the graph
-# hover = HoverTool(
-#     tooltips=[
-#         ('time', '@timestamp{%H:%M:%S'),
-#         ('price', '@price{($ 0.00)}'),
-#     ],
-#     formatters={
-#         '@timestamp': 'datetime'
-#     }
-# )
-#
-# price_chart = hv.DynamicMap(
-#     hv.Curve,
-#     streams=[Buffer(sdf, length=100)]
-# ).opts(
-#     title=f'Live {product_to_stream} Chart',
-#     padding=0.05,
-#     width=800,
-#     height=300,
-#     show_grid=True,
-#     tools=[hover], # add the interactive tools we defined above
-# )
-#
-# mean_chart = hv.DynamicMap(
-#     hv.Curve,
-#     streams=[Buffer(sdf['price'].rolling(50).mean(), length=100)],
-# ).opts(
-#     tools=[hover]
-# )
-#
-# rsi_chart = hv.DynamicMap(
-#     hv.Curve,
-#     streams=[rsi_buffer]
-# ).opts(
-#     title='',
-#     width=800,
-#     height=150,
-#     axiswise=True,
-# )
-#
-# table_chart = hv.DynamicMap(
-#     hv.Table,
-#     streams=[Buffer(sdf, length=10)]
-# ).opts(padding=0.1, width=300)
-#
-# rtlink = RangeToolLink(rsi_chart, price_chart)
-# combined_chart = ((price_chart*mean_chart) + rsi_chart).opts(shared_axes=True, merge_tools=False).cols(1)
+def getAllProductInfo():
+    method = Method.GET.name
+    path = '/api/v3/brokerage/products'
+    payload = ''
+    response = coinbase_request(method, path, payload)
+    # for product in response['products']:
+    #     print(product['product_id'])
+    return response
+
+
+def getProductInfo(pair):
+    method = Method.GET.name
+    path = f'/api/v3/brokerage/products/{pair}'
+    payload = ''
+    response = coinbase_request(method, path, payload)
+    
+    if response is None:
+        return None
+
+    return response
+
+
+def lambda_handler(event, context):
+    my_side = Side.BUY.name
+    my_trading_pair = "BTC-USD"
+    usd_order_size = 10
+    factor = .998 if my_side == Side.BUY.name else 1.002
+
+    product_info = getProductInfo(my_trading_pair)
+    
+    if product_info is None:
+        print("Error: Unable to fetch product information.")
+        return
+
+    quote_currency_price_increment = abs(round(math.log(float(product_info['quote_increment']), 10)))
+    base_currency_price_increment = abs(round(math.log(float(product_info['base_increment']), 10)))
+
+    my_limit_price = str(round(float(product_info['price']) * factor, quote_currency_price_increment))
+    my_order_size = str(round(usd_order_size / float(my_limit_price), base_currency_price_increment))
+
+    placeLimitOrder(my_side, my_trading_pair, my_order_size, my_limit_price)
+
+    print(f'The spot price of {my_trading_pair} is ${product_info["price"]}')
