@@ -1,17 +1,8 @@
 from env.api_key import *
-<<<<<<< HEAD
-import cbpro
-
-auth_sandbox_client = cbpro.AuthenticatedClient(sandbox_api_key, sandbox_api_secret, sandbox_api_pass,
-                                                api_url="https://api-public.sandbox.exchange.coinbase.com")
-
-auth_client = cbpro.AuthenticatedClient(api_key, api_secret, api_pass)
-=======
 
 class Side(Enum):
     BUY = 1
     SELL = 0
->>>>>>> dbba047580ca394bafb9b5c578608b0eb8099075
 
 
 class Method(Enum):
@@ -93,12 +84,6 @@ def placeStopOrder(side, pair, size, stop_price, limit_price):
     coinbase_request(method, path, payload)
 
 
-<<<<<<< HEAD
-def get_live_accounts():
-
-    for account in auth_client.get_accounts():
-        yield account
-=======
 def getAllProductInfo():
     method = Method.GET.name
     path = '/api/v3/brokerage/products'
@@ -142,4 +127,3 @@ def lambda_handler(event, context):
     placeLimitOrder(my_side, my_trading_pair, my_order_size, my_limit_price)
 
     print(f'The spot price of {my_trading_pair} is ${product_info["price"]}')
->>>>>>> dbba047580ca394bafb9b5c578608b0eb8099075
