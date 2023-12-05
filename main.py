@@ -6,7 +6,8 @@ if __name__ == '__main__':
     cur = 'USD'
     spcl_assts = ['SHIB', 'VTHO', 'SPELL', 'SHPING', 'ASM']
     buy_price = float(input("Please enter the buy price: "))
-    sell_price = float('{:.4f}'.format(buy_price * 1.025))
+    stp_dirctn = 'STOP_DIRECTION_STOP_DOWN'
+    sell_price = float('{:.3f}'.format(buy_price * 1.0175))
     coin = input("Please enter the coin abbreviation for the coin\n"
                  "you are investing in\n"
                  "Example: BTC\n").upper()
@@ -32,8 +33,8 @@ if __name__ == '__main__':
                 flld_sell_ordr = order
             
         if price <= buy_price:
-            buy_price = float('{:.4f}'.format(price))
-            sell_price = float('{:.4f}'.format(buy_price * 1.025))
+            buy_price = float('{:.3f}'.format(price))
+            sell_price = float('{:.3f}'.format(buy_price * 1.0175))
             for wallet in coinbase_request('GET', '/api/v3/brokerage/accounts?limit=250', '')['accounts']:
                 if wallet['currency'] == cur and float(wallet['available_balance']['value']) >= min_currency_bal and min_currency_bal >= 1:
                     if last_buy_ordr and not last_buy_ordr['order_id'] == '0123456789':
@@ -52,18 +53,24 @@ if __name__ == '__main__':
                     #                            ((float(wallet['available_balance']['value']) / price) * 0.006)))
                     # min_asset_bal = float(fiat_cur)
                     # For Cryptocurrency That Allows Decimal Sizes
-                    fiat_cur = '{:.1f}'.format((float(wallet['available_balance']['value']) / price) -
+                    fiat_cur = '{:.2f}'.format((float(wallet['available_balance']['value']) / price) -
                                                    ((float(wallet['available_balance']['value']) / price) * 0.006))
                     min_asset_bal = float(fiat_cur)
                     # For Market Buy Orders
-                    # fiat_cur = '{:.2f}'.format(math.floor(float(wallet['available_balance']['value'])))
-                    # min_asset_bal = '{:.2f}'.format((float(wallet['available_balance']['value']) / price) -
+                    # fiat_cur = '{:.3f}'.format(math.floor(float(wallet['available_balance']['value'])))
+                    # min_asset_bal = '{:.3f}'.format((float(wallet['available_balance']['value']) / price) -
                     #                                ((float(wallet['available_balance']['value']) / price) * 0.006))
                     # # print(fiat_cur)
                     print(cur + ' Available: ' + '{:.2f}'.format(float(wallet['available_balance']['value'])))
                     # Limit Buy Order (Max)
-                    last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur, str(price))
+                    if coin in spcl_assts:
+                        last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur, price)
+                    else:
+                        last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur, str(price))
                     print(last_buy_ordr)
+                    # Stop Loss Order (Max)
+                    # last_buy_ordr = placeStopOrder(Side.BUY.name, asset_id, fiat_cur, str(price * 0.975), str(price), stp_dirctn)
+                    # print(last_buy_ordr)
                     # Limit Buy Order (Choose Amount of Cryptocurrency You Want to Buy)
                     # auth_client.place_limit_order(product_id=asset_id, side='buy', price=str(price),
                     #                               size=str(lmtbuy_asst_amnt))
@@ -80,7 +87,7 @@ if __name__ == '__main__':
                     if wallet['currency'] == coin and float(wallet['available_balance']['value']) >= min_asset_bal:
                         if count == 0:
                             print('Your\'re already invested in ' + coin + '!')
-                            print(coin + ' Available: ' + '{:.4f}'.format(float(wallet['available_balance']['value'])))
+                            print(coin + ' Available: ' + '{:.3f}'.format(float(wallet['available_balance']['value'])))
                             print(f'Buy price: ${str(buy_price)}')
                             print(f'Sell price: ${str(sell_price)}')
                             if delay == 1:
@@ -101,8 +108,8 @@ if __name__ == '__main__':
 
         elif price >= sell_price:
             if flld_sell_ordr and not flld_buy_ordr:
-                buy_price = float('{:.4f}'.format(price))
-                sell_price = float('{:.4f}'.format(buy_price * 1.025))
+                buy_price = float('{:.3f}'.format(price))
+                sell_price = float('{:.3f}'.format(buy_price * 1.0175))
             elif not flld_buy_ordr and not flld_sell_ordr:
                 if not last_buy_ordr:
                     last_buy_ordr = {
@@ -121,12 +128,12 @@ if __name__ == '__main__':
                                       "user_id": "fa018cd4-479c-5a78-b676-533726262bb0",
                                       "side": "BUY"
                                     }
-                buy_price = float('{:.4f}'.format(price))
-                sell_price = float('{:.4f}'.format(buy_price * 1.025))
+                buy_price = float('{:.3f}'.format(price))
+                sell_price = float('{:.3f}'.format(buy_price * 1.0175))
 
             for asset in coinbase_request('GET', '/api/v3/brokerage/accounts?limit=250', '')['accounts']:
                 if asset['currency'] == coin and float(asset['available_balance']['value']) >= min_asset_bal:
-                    if last_sell_ordr:
+                    if last_sell_ordr and not last_sell_ordr['order_id'] == '0123456789':
                         print(f"There is already a buy order open for {coin}!\nOrder amount: {last_sell_ordr['size']}")
                         print(f'Buy price: ${str(buy_price)}')
                         print(f'Sell price: ${str(sell_price)}')
@@ -138,7 +145,7 @@ if __name__ == '__main__':
                     else:
                         print('You made a profit! Selling ' + coin + '!')
                     if coin == 'MKR':
-                        coin_cur = '{:.4f}'.format(float(asset['available_balance']['value']))
+                        coin_cur = '{:.3f}'.format(float(asset['available_balance']['value']))
                     else:
                         coin_cur = asset['available_balance']['value']
                     print(coin + ' Available: ' + coin_cur)
@@ -161,7 +168,7 @@ if __name__ == '__main__':
                     if asset['currency'] == cur and float(asset['available_balance']['value']) >= min_currency_bal:
                         print('You\'ve already made a profit\n'
                               'and are waiting to buy back in')
-                        print(cur + ' Available: ' + '{:.2f}'.format(float(asset['available_balance']['value'])))
+                        print(cur + ' Available: ' + '{:.3f}'.format(float(asset['available_balance']['value'])))
                         print(f'Buy price: ${str(buy_price)}')
                         print(f'Sell price: ${str(sell_price)}')
                         if delay == 1:
@@ -214,9 +221,9 @@ if __name__ == '__main__':
     #                 fiat_cur = '{:.8f}'.format((float(wallet['available_balance']['value']) / price) -
     #                                            ((float(wallet['available_balance']['value']) / price) * 0.006))
     #                 print(wallet)
-    #                 # sb_lmtbuy_asst_amnt = '{:.2f}'.format(math.floor(float(fiat_cur)/sb_buy_price))
+    #                 # sb_lmtbuy_asst_amnt = '{:.3f}'.format(math.floor(float(fiat_cur)/sb_buy_price))
     #                 # print('Currency balance converted to cryptocurrency: ' + sb_lmtbuy_asst_amnt)
-    #                 print(sb_cur + ' Available: ' + '{:.2f}'.format(float(wallet['available_balance']['value'])))
+    #                 print(sb_cur + ' Available: ' + '{:.3f}'.format(float(wallet['available_balance']['value'])))
     #                 auth_sandbox_client.place_limit_order(product_id=sb_asset_id, side='buy', price=str(price),
     #                                               size=fiat_cur)
     #                 # auth_sandbox_client.place_limit_order(product_id=sb_asset_id, side='buy', price=str(price),
@@ -231,7 +238,7 @@ if __name__ == '__main__':
     #                 if wallet['currency'] == sb_coin and float(wallet['available_balance']['value']) >= sb_min_asset_bal:
     #                     if sb_count == 0:
     #                         print('Your\'re already invested in ' + sb_coin + '!')
-    #                         print(sb_coin + ' Available: ' + '{:.2f}'.format(float(wallet['available_balance']['value'])))
+    #                         print(sb_coin + ' Available: ' + '{:.3f}'.format(float(wallet['available_balance']['value'])))
     #                         if sb_delay == 1:
     #                             print(f'Checking again in {str(sb_delay)} second...')
     #                         else:
@@ -250,8 +257,8 @@ if __name__ == '__main__':
     #         for asset in get_sandbox_accounts():
     #             if asset['currency'] == sb_coin and float(asset['available_balance']['value']) >= sb_min_asset_bal:
     #                 print('You made a profit! Selling ' + sb_coin + '!')
-    #                 # '{:.2f}'.format(math.floor(float(asset['available_balance']['value'])))
-    #                 # '{:.2f}'.format(float(asset['available_balance']['value']))
+    #                 # '{:.3f}'.format(math.floor(float(asset['available_balance']['value'])))
+    #                 # '{:.3f}'.format(float(asset['available_balance']['value']))
     #                 coin_cur = asset['available_balance']['value']
     #                 print(sb_coin + ' Available: ' + coin_cur)
     #                 # auth_sandbox_client.place_limit_order(product_id=sb_asset_id, side='sell', price=str(sb_sell_price),
@@ -262,7 +269,7 @@ if __name__ == '__main__':
     #                 if asset['currency'] == sb_cur and float(asset['available_balance']['value']) >= sb_min_currency_bal:
     #                     print('You\'ve already made a profit\n'
     #                           'and are waiting to buy back in')
-    #                     print(sb_cur + ' Available: ' + '{:.2f}'.format(float(asset['available_balance']['value'])))
+    #                     print(sb_cur + ' Available: ' + '{:.3f}'.format(float(asset['available_balance']['value'])))
     #                     if sb_delay == 1:
     #                         print(f'Checking again in {str(sb_delay)} second...')
     #                     else:
