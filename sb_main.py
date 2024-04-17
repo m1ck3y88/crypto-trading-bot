@@ -1,30 +1,26 @@
-from connectors.coinbasepro_products import *
-import sys
+from connectors.sb_coinbasepro_products import *
 
 if __name__ == '__main__':
 
     # Live Account Limit Buy/Limit Sell Algorithm
     cur = 'USD'
     spcl_assts = ['SHIB', 'BONK', 'VTHO', 'SPELL', 'SHPING']
-    buy_price = float(sys.argv[1])
-    # float(input("Please enter the buy price: "))
+    buy_price = float(input("Please enter the buy price: "))
     # stp_dirctn = 'STOP_DIRECTION_STOP_DOWN'
-    price_dec_plcs = int(sys.argv[2])
-    amnt_dec_plcs = int(sys.argv[3])
-    prc_mltplr = float(sys.argv[4])
-    sll_prc_divdr = float(sys.argv[5])
+    price_dec_plcs = 2
+    amnt_dec_plcs = 3
+    prc_mltplr = 1.025
+    sll_prc_divdr = 0.00625
     sell_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(buy_price * (prc_mltplr)))
-    coin = sys.argv[6].upper()
-    # input("Please enter the coin abbreviation for the coin\n"
-    #              "you are investing in\n"
-    #              "Example: BTC\n").upper()
+    coin = input("Please enter the coin abbreviation for the coin\n"
+                 "you are investing in\n"
+                 "Example: BTC\n").upper()
     asset_id = '{}-{}'.format(coin,cur)
     # set_usd_accnt_bal = 602.00
     min_currency_bal = 2
     min_asset_bal = 1
-    delay = int(sys.argv[7])
-    # int(input("Please enter the number of seconds you choose to wait before checking\n"
-    #                   "to buy/sell again: "))
+    delay = int(input("Please enter the number of seconds you choose to wait before checking\n"
+                      "to buy/sell again: "))
     last_buy_ordr = {}
     last_sell_ordr = {}
     flld_buy_ordr = {}
@@ -58,23 +54,34 @@ if __name__ == '__main__':
                         print('---------------------------------------------\n')
                         break
                     print('Buying ' + coin + '!')
+                    # For Set Amount Of Cryptocurrency That Doesn't Allow Decimal Sizes
+                    # fiat_cur = ''
+                    # if wallet['available_balance']['value'] > set_usd_accnt_bal:
+                    #     fiat_cur = '{:.2f}'.format(math.floor((float(set_usd_accnt_bal/ price) -
+                    #                                ((set_usd_accnt_bal / price) * 0.0025))))
+                    # else:
+                    #     break
+                    # min_asset_bal = float(fiat_cur)
+
+                    # For Set Amount Of Cryptocurrency That Allows Decimal Sizes
+                    # fiat_cur = ('{:.' + str(price_dec_plcs) + 'f}').format((float(set_usd_accnt_bal/ price)
+                    #                                - ((set_usd_accnt_bal / price) * 0.0025)))
+                    # min_asset_bal = float(fiat_cur)
 
                     # For Cryptocurrency That Doesn't Allow Decimal Sizes
-                    # fiat_cur = '{:.2f}'.format(math.floor((float(wallet['available_balance']['value']) / price)
+                    # fiat_cur = ('{:.' + str(price_dec_plcs) + 'f}').format(math.floor((float(wallet['available_balance']['value']) / price) -
+                    #                            (float(wallet['available_balance']['value']) / price * 0.0025)))
                     # min_asset_bal = float(fiat_cur)
 
                     # For Cryptocurrency That Allows Decimal Sizes
                     # fiat_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format((float(wallet['available_balance']['value']) / price)) 
+                    #                            -((float(wallet['available_balance']['value']) / price) * 0.0025))
                     # min_asset_bal = float(fiat_cur)
 
-                    # For Market Buy Orders That Don't Allow Decimal Sizes
-                    # fiat_cur = ('{:.2f}').format(math.floor(float(wallet['available_balance']['value'])))
-                    # min_asset_bal = float(fiat_cur)
-    
                     # For Market Buy Orders That Allow Decimal Sizes
                     fiat_cur = ('{:.' + str(price_dec_plcs) + 'f}').format(float(wallet['available_balance']['value']))
-                    # min_asset_bal = float(fiat_cur)
-
+                    # min_asset_bal = fiat_cur
+    
                     # Limit Buy Order (Max)
                     # if coin in spcl_assts:
                     #     last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur,  '{:.8f}'.format(price))
@@ -83,6 +90,10 @@ if __name__ == '__main__':
                     
                     # Stop Loss Order (Max)
                     # last_buy_ordr = placeStopOrder(Side.BUY.name, asset_id, fiat_cur, str(price * 0.975), str(price), stp_dirctn)
+
+                    # Limit Buy Order (Choose Amount of Cryptocurrency You Want to Buy)
+                    # auth_client.place_limit_order(product_id=asset_id, side='buy', price=str(price),
+                    #                               size=str(lmtbuy_asst_amnt))
 
                     # Market Buy Order
                     last_buy_ordr = placeMarketBuyOrder(Side.BUY.name, asset_id, fiat_cur)
@@ -154,17 +165,24 @@ if __name__ == '__main__':
                     else:
                         print('You made a profit! Selling ' + coin + '!')
 
-                    # For Cryptocurrency That Doesn't Allow Decimal Values
-                    coin_cur = '{:.2f}'.format(math.floor(float(asset['available_balance']['value'])))
+                    #For Market Orders That Don't Allow Decimal Values
+                    # coin_cur = ('{:.2f}').format(math.floor(float(asset['available_balance']['value'])))
+
+                    #For Market Orders That Allow Decimal Values
+                    coin_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(asset['available_balance']['value']))
 
                     # For Cryptocurrency That Allows Decimal Values
-                    # coin_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(asset['available_balance']['value']))
+                    # coin_cur = ('{:.2f}').format(float(asset['available_balance']['value'])) -
+                    #                            (float(asset['available_balance']['value']) * 0.0025))
+
+                    # For Cryptocurrency That Doesn't Allow Decimal Values
+                    # coin_cur = ('{:.2f}').format(math.floor(float(asset['available_balance']['value'])))
 
                     # Limit Sell Order (Max)
-                    last_sell_ordr = placeLimitOrder(Side.SELL.name, asset_id, coin_cur, str(price))
+                    # last_sell_ordr = placeLimitOrder(Side.SELL.name, asset_id, coin_cur, str(price))
 
                     # Market Sell Order
-                    # last_sell_ordr = placeMarketSellOrder(Side.BUY.name, asset_id, coin_cur)
+                    last_sell_ordr = placeMarketSellOrder(Side.BUY.name, asset_id, coin_cur)
 
                     print(coin + ' Available: ' + coin_cur)
                     print(last_sell_ordr)

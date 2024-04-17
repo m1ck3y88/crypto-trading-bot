@@ -1,4 +1,4 @@
-from env.api_key import *
+from env.sb_api_key import *
 import http.client
 import hmac
 import hashlib
@@ -30,7 +30,7 @@ def generate_client_order_id():
 
 
 def coinbase_request(method, path, body):
-    conn = http.client.HTTPSConnection("api.coinbase.com")
+    conn = http.client.HTTPSConnection("api-public.sandbox.exchange.coinbase.com")
     timestamp = str(int(time.time()))
     message = timestamp + method + path.split('?')[0] + str(body)
     signature = hmac.new(creds[1].encode('utf-8'), message.encode('utf-8'), digestmod=hashlib.sha256).hexdigest()

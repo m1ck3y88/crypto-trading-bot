@@ -1,17 +1,4 @@
 from env.api_key import *
-import http.client
-import hmac
-import hashlib
-import json
-import time
-import base64
-import uuid
-from enum import Enum
-import math
-
-
-
-
 
 class Side(Enum):
     BUY = 1
@@ -77,7 +64,7 @@ def placeLimitOrder(side, pair, size, limit_price):
 
     coinbase_request(method, path, payload)
 
-def placeStopOrder(side, pair, size, stop_price, limit_price, stop_dirctn):
+def placeStopOrder(side, pair, size, stop_price, limit_price):
     method = Method.POST.name
     path = '/api/v3/brokerage/orders'
     payload = json.dumps({
@@ -85,12 +72,11 @@ def placeStopOrder(side, pair, size, stop_price, limit_price, stop_dirctn):
         "side": side,
         "product_id": pair,
         "order_configuration": {
-            "stop_limit_stop_limit_gtc": {
+            "limit_limit_gtc": {
                 "post_only": False,
                 "stop_price": stop_price,
                 "limit_price": limit_price,
-                "base_size": size,
-                "stop_direction": stop_dirctn
+                "base_size": size
             }
         }
     })
@@ -128,6 +114,7 @@ def placeMarketSellOrder(side, pair, size):
     })
 
     coinbase_request(method, path, payload)
+
 
 
 def getAllProductInfo():
