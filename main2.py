@@ -6,24 +6,25 @@ if __name__ == '__main__':
     # Live Account Limit Buy/Limit Sell Algorithm
     cur = 'USD'
     spcl_assts = ['SHIB', 'BONK', 'VTHO', 'SPELL', 'SHPING']
-    buy_price = float(sys.argv[1])
     # float(input("Please enter the buy price: "))
     # stp_dirctn = 'STOP_DIRECTION_STOP_DOWN'
-    price_dec_plcs = int(sys.argv[2])
-    amnt_dec_plcs = int(sys.argv[3])
-    sell_price_mltplr = float(sys.argv[4])
-    buy_price_divdr = float(sys.argv[5])
-    sell_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(buy_price * (sell_price_mltplr)))
+    price_dec_plcs = int(sys.argv[1])
+    amnt_dec_plcs = int(sys.argv[2])
+    sell_price_mltplr = float(sys.argv[3])
+    buy_price_divdr = float(sys.argv[4])
     fee = 0.0025
-    coin = sys.argv[6].upper()
+    coin = sys.argv[5].upper()
     # input("Please enter the coin abbreviation for the coin\n"
     #              "you are investing in\n"
     #              "Example: BTC\n").upper()
     asset_id = '{}-{}'.format(coin,cur)
+    orig_buy_price = float(getProductInfo(asset_id)['price'])
+    buy_price = orig_buy_price
+    sell_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(buy_price * (sell_price_mltplr)))
     # set_usd_accnt_bal = 602.00
     min_currency_bal = 10
-    min_asset_bal = 1
-    delay = int(sys.argv[7])
+    min_asset_bal = 0.1
+    delay = int(sys.argv[6])
     # int(input("Please enter the number of seconds you choose to wait before checking\n"
     #                   "to buy/sell again: "))
     last_buy_ordr = {}
@@ -53,9 +54,7 @@ if __name__ == '__main__':
         #         sell_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(buy_price * (sell_price_mltplr)))
             
         if price <= buy_price:
-            # if price < buy_price:
-            #     buy_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(price))
-            #     sell_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(buy_price * (sell_price_mltplr)))
+            
             for wallet in coinbase_request('GET', '/api/v3/brokerage/accounts?limit=250', '')['accounts']:
                 if wallet['currency'] == cur and float(wallet['available_balance']['value']) >= min_currency_bal:
                     if last_buy_ordr and not last_buy_ordr['order_id'] == '0123456789':

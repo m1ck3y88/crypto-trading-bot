@@ -9,10 +9,6 @@ import uuid
 from enum import Enum
 import math
 
-
-
-
-
 class Side(Enum):
     BUY = 1
     SELL = 0
