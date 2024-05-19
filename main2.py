@@ -4,6 +4,7 @@ import sys
 if __name__ == '__main__':
 
     # Live Account Limit Buy/Limit Sell Algorithm
+    # main()
     cur = 'USD'
     spcl_assts = ['SHIB', 'BONK', 'VTHO', 'SPELL', 'SHPING']
     # float(input("Please enter the buy price: "))
@@ -12,7 +13,6 @@ if __name__ == '__main__':
     amnt_dec_plcs = int(sys.argv[2])
     sell_price_mltplr = float(sys.argv[3])
     buy_price_divdr = float(sys.argv[4])
-    fee = 0.0025
     coin = sys.argv[5].upper()
     # input("Please enter the coin abbreviation for the coin\n"
     #              "you are investing in\n"
@@ -24,34 +24,47 @@ if __name__ == '__main__':
     # set_usd_accnt_bal = 602.00
     min_currency_bal = 10
     min_asset_bal = 0.1
-    delay = int(sys.argv[6])
+
+    """
+    ONE   => LIMIT REG NO DEC
+    TWO   => LIMIT TAKER NO DEC
+    THREE => LIMIT REG DEC
+    FOUR  => LIMIT TAKER DEC
+    FIVE  => MARKET REG NO DEC
+    SIX   => MARKET TAKER NO DEC
+    SEVEN => MARKET REG DEC
+    EIGHT => MARKET TAKER DEC
+
+    """
+    buy_order_type = sys.argv[6].upper()
+    sell_order_type = sys.argv[7].upper()
+    select_limit_buy_order = sys.argv[8]
+    select_limit_sell_order = sys.argv[9]
+
+    delay = int(sys.argv[10])
+    count = 0
+    fee = 0.0041
+    # float(input("Enter fee percentage.\nExample: 0.0025\n"))
     # int(input("Please enter the number of seconds you choose to wait before checking\n"
     #                   "to buy/sell again: "))
     last_buy_ordr = {}
     last_sell_ordr = {}
     flld_buy_ordr = {}
-    flld_sell_ordr = {}
-    count = 0
+    flld_sell_ordr = {}    
+
+    if select_limit_buy_order in ['true', 'false'] and select_limit_buy_order == 'true':
+        select_limit_buy_order = True
+    else:
+        select_limit_buy_order = False
+
+    if select_limit_sell_order in ['true', 'false'] and select_limit_sell_order == 'true':
+        select_limit_sell_order = True
+    else:
+        select_limit_sell_order = False
 
     while True:
         
         price = float(getProductInfo(asset_id)['price'])
-
-        # for order in coinbase_request('GET', '/api/v3/brokerage/orders/historical/fills', '')['fills']:
-
-        #     if last_buy_ordr and order['order_id'] == last_buy_ordr['order_id']:
-        #         flld_buy_ordr = order
-
-        #     if last_sell_ordr and order['order_id'] == last_sell_ordr['order_id']:
-        #         flld_sell_ordr = order
-
-        # if flld_buy_ordr and flld_buy_ordr['order_type'] == 'MARKET' and float(flld_buy_ordr['average_filled_price']) > buy_price:
-
-        #         buy_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(float(flld_buy_ordr['average_filled_price'])))
-
-        # if flld_sell_ordr and flld_buy_ordr['order_type'] == 'MARKET' and float(flld_buy_ordr['average_filled_price']) < sell_price:
-
-        #         sell_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(buy_price * (sell_price_mltplr)))
             
         if price <= buy_price:
             
@@ -69,48 +82,62 @@ if __name__ == '__main__':
                         break
                     print('Buying ' + coin + '!')
 
-                    # For Limit Buy Orders That Don't Allow Decimal Sizes
-                    # fiat_cur = '{:.2f}'.format(math.floor((float(wallet['available_balance']['value']) / price)))
-                    # min_asset_bal = float(fiat_cur)
+                    """
+                    ONE   => LIMIT REG NO DEC
+                    TWO   => LIMIT TAKER NO DEC
+                    THREE => LIMIT REG DEC
+                    FOUR  => LIMIT TAKER DEC
+                    FIVE  => MARKET REG NO DEC
+                    SIX   => MARKET TAKER NO DEC
+                    SEVEN => MARKET REG DEC
+                    EIGHT => MARKET TAKER DEC
 
-                    # For Limit Buy Taker Orders That Don't Allow Decimal Sizes                    
-                    # coin_amount = '{:.2f}'.format(math.floor((float(wallet['available_balance']['value']) / price)))
-                    # fiat_cur = '{:.2f}'.format(math.floor(float(coin_amount) - (float(coin_amount) * fee)))
-                    # # min_asset_bal = float(fiat_cur)
+                    """
 
-                    # For Limit Buy Orders That Allow Decimal Sizes
-                    # fiat_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format((float(wallet['available_balance']['value']) / price))
-                    # min_asset_bal = float(fiat_cur)
+                    if buy_order_type == 'ONE':
+                        # For Limit Buy Orders That Don't Allow Decimal Sizes
+                        fiat_cur = '{:.2f}'.format(math.floor((float(wallet['available_balance']['value']) / price)))
+                        # min_asset_bal = float(fiat_cur)
+                    elif buy_order_type == 'TWO':
+                        # For Limit Buy Taker Orders That Don't Allow Decimal Sizes                    
+                        coin_amount = '{:.2f}'.format(math.floor((float(wallet['available_balance']['value']) / price)))
+                        fiat_cur = '{:.2f}'.format(math.floor(float(coin_amount) - (float(coin_amount) * fee)))
+                        # min_asset_bal = float(fiat_cur)
+                    elif buy_order_type == 'THREE':
+                        # For Limit Buy Orders That Allow Decimal Sizes
+                        fiat_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format((float(wallet['available_balance']['value']) / price))
+                        # min_asset_bal = float(fiat_cur)
+                    elif buy_order_type == 'FOUR':
+                        # For Limit Buy Taker Orders That Allow Decimal Sizes                    
+                        coin_amount = ('{:.' + str(amnt_dec_plcs) + 'f}').format((float(wallet['available_balance']['value']) / price))
+                        fiat_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(coin_amount) - (float(coin_amount) * fee))
+                        # min_asset_bal = float(fiat_cur)
+                    elif buy_order_type == 'FIVE':
+                        # For Market Buy Orders That Don't Allow Decimal Sizes
+                        fiat_cur = '{:.2f}'.format(math.floor(float(wallet['available_balance']['value'])))
+                        # min_asset_bal = float(fiat_cur)
+                    elif buy_order_type == 'SIX':
+                        # For Market Buy Taker Orders That Don't Allow Decimal Sizes
+                        fiat_cur = '{:.2f}'.format(math.floor(float(wallet['available_balance']['value']) -
+                            (float(wallet['available_balance']['value']) * fee)))
+                    elif buy_order_type == 'SEVEN':
+                        # For Market Buy Orders That Allow Decimal Sizes
+                        fiat_cur = ('{:.' + str(price_dec_plcs) + 'f}').format(float(wallet['available_balance']['value']))
+                        # min_asset_bal = float(fiat_cur)
+                    elif buy_order_type == 'EIGHT':
+                        # For Market Buy Taker Orders That Allow Decimal Sizes
+                        fiat_cur = ('{:.' + str(price_dec_plcs) + 'f}').format(float(wallet['available_balance']['value']) -
+                            (float(wallet['available_balance']['value']) * fee))
 
-                    # For Limit Buy Taker Orders That Allow Decimal Sizes                    
-                    coin_amount = ('{:.' + str(amnt_dec_plcs) + 'f}').format((float(wallet['available_balance']['value']) / price))
-                    fiat_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(coin_amount) - (float(coin_amount) * fee))
-                    # min_asset_bal = float(fiat_cur)
-
-                    # For Market Buy Orders That Don't Allow Decimal Sizes
-                    # fiat_cur = '{:.2f}'.format(math.floor(float(wallet['available_balance']['value'])))
-                    # min_asset_bal = float(fiat_cur)
-
-                    # For Market Buy Taker Orders That Don't Allow Decimal Sizes
-                    # fiat_cur = '{:.2f}'.format(math.floor(float(wallet['available_balance']['value']) -
-                    #     (float(wallet['available_balance']['value']) * fee)))
-
-                    # For Market Buy Orders That Allow Decimal Sizes
-                    # fiat_cur = ('{:.' + str(price_dec_plcs) + 'f}').format(float(wallet['available_balance']['value']))
-                    # min_asset_bal = float(fiat_cur)
-
-                    # For Market Buy Taker Orders That Allow Decimal Sizes
-                    # fiat_cur = ('{:.' + str(price_dec_plcs) + 'f}').format(float(wallet['available_balance']['value']) -
-                    #     (float(wallet['available_balance']['value']) * fee))
-
-                    # Limit Buy Order (Max)
-                    if coin in spcl_assts:
-                        last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur, '{:.8f}'.format(price))
-                    else:
-                        last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur, str(price))
-                    
-                    # Market Buy Order
-                    # last_buy_ordr = placeMarketBuyOrder(Side.BUY.name, asset_id, fiat_cur)
+                    if select_limit_buy_order:
+                        # Limit Buy Order (Max)
+                        if coin in spcl_assts:
+                            last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur, '{:.8f}'.format(price))
+                        else:
+                            last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur, str(price))
+                    elif not select_limit_buy_order:
+                        # Market Buy Order
+                        last_buy_ordr = placeMarketBuyOrder(Side.BUY.name, asset_id, fiat_cur)
                     
                     # Stop Loss Order (Max)
                     # last_buy_ordr = placeStopOrder(Side.BUY.name, asset_id, fiat_cur, str(price * 0.975), str(price), stp_dirctn)
@@ -182,25 +209,35 @@ if __name__ == '__main__':
                     else:
                         print('You made a profit! Selling ' + coin + '!')
 
-                    # For Limit/Market Sell Orders That Don't Allow Decimal Values
-                    # coin_cur = '{:.2f}'.format(math.floor(float(asset['available_balance']['value'])))
+                    """
+                    ONE   => REG NO DEC ORDER
+                    TWO   => TAKER NO DEC ORDER
+                    THREE => REG DEC ORDER
+                    FOUR  => TAKER DEC ORDER
 
-                    # For Limit/Market Sell Taker Orders That Don't Allow Decimal Values
-                    # asset_amount = '{:.2f}'.format(math.floor(float(asset['available_balance']['value'])))
-                    # coin_cur = '{:.2f}'.format(math.floor(float(asset_amount) - (float(asset_amount) * fee)))
+                    """
 
-                    # For Limit/Market Sell Orders That Allow Decimal Values
-                    # coin_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(asset['available_balance']['value']))
+                    if sell_order_type == 'ONE':
+                        # For Limit/Market Sell Orders That Don't Allow Decimal Values
+                        coin_cur = '{:.2f}'.format(math.floor(float(asset['available_balance']['value'])))
+                    elif sell_order_type == 'TWO':
+                        # For Limit/Market Sell Taker Orders That Don't Allow Decimal Values
+                        asset_amount = '{:.2f}'.format(math.floor(float(asset['available_balance']['value'])))
+                        coin_cur = '{:.2f}'.format(math.floor(float(asset_amount) - (float(asset_amount) * fee)))
+                    elif sell_order_type == 'THREE':
+                        # For Limit/Market Sell Orders That Allow Decimal Values
+                        coin_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(asset['available_balance']['value']))
+                    elif sell_order_type == 'FOUR':
+                        # For Limit/Market Sell Taker Orders That Allow Decimal Values
+                        asset_amount = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(asset['available_balance']['value']))
+                        coin_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(asset_amount) - (float(asset_amount) * fee))
 
-                    # For Limit/Market Sell Taker Orders That Allow Decimal Values
-                    asset_amount = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(asset['available_balance']['value']))
-                    coin_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(asset_amount) - (float(asset_amount) * fee))
-
-                    # Limit Sell Order (Max)
-                    last_sell_ordr = placeLimitOrder(Side.SELL.name, asset_id, coin_cur, str(price))
-
-                    # Market Sell Order
-                    # last_sell_ordr = placeMarketSellOrder(Side.SELL.name, asset_id, coin_cur)
+                    if select_limit_sell_order:
+                        # Limit Sell Order (Max)
+                        last_sell_ordr = placeLimitOrder(Side.SELL.name, asset_id, coin_cur, str(price))
+                    else:
+                        # Market Sell Order
+                        last_sell_ordr = placeMarketSellOrder(Side.SELL.name, asset_id, coin_cur)
 
                     print(coin + ' Available: ' + coin_cur)
                     print(last_sell_ordr)

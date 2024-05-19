@@ -1,10 +1,5 @@
 env
-<<<<<<< HEAD
-/.idea
-/__pycache__
-manual_bot_setup.txt
-=======
+main-DESKTOP
 .idea
 __pycache__
 .gitignore
->>>>>>> 662eda0cc4a2a0da7ad88e05bed586c774b0013f
