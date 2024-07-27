@@ -1,5 +1,9 @@
 env
+*.json
 main-DESKTOP
 .idea
+.ipynb_checkpoints
 __pycache__
-.gitignore
+main.ipynb
+main3.py
+main4.py

@@ -1,4 +1,9 @@
+from cryptography.hazmat.primitives import serialization
+from coinbase import jwt_generator
+from coinbase.rest import RESTClient
 from env.api_key import *
+import jwt
+import secrets
 import http.client
 import hmac
 import hashlib
@@ -49,7 +54,7 @@ def coinbase_request(method, path, body):
 
     try:
         response_data = json.loads(data.decode("utf-8"))
-        print(json.dumps(response_data, indent=2))
+        # print(json.dumps(response_data, indent=2))
         return response_data
     except json.JSONDecodeError:
         print("Error: Unable to decode JSON response. Raw response data:", data)
@@ -71,7 +76,7 @@ def placeLimitOrder(side, pair, size, limit_price):
         }
     })
 
-    coinbase_request(method, path, payload)
+    return coinbase_request(method, path, payload)
 
 def placeStopOrder(side, pair, size, stop_price, limit_price, stop_dirctn):
     method = Method.POST.name
@@ -91,7 +96,7 @@ def placeStopOrder(side, pair, size, stop_price, limit_price, stop_dirctn):
         }
     })
 
-    coinbase_request(method, path, payload)
+    return coinbase_request(method, path, payload)
 
 def placeMarketBuyOrder(side, pair, size):
     method = Method.POST.name
@@ -107,7 +112,7 @@ def placeMarketBuyOrder(side, pair, size):
         }
     })
 
-    coinbase_request(method, path, payload)
+    return coinbase_request(method, path, payload)
 
 def placeMarketSellOrder(side, pair, size):
     method = Method.POST.name
@@ -123,7 +128,7 @@ def placeMarketSellOrder(side, pair, size):
         }
     })
 
-    coinbase_request(method, path, payload)
+    return coinbase_request(method, path, payload)
 
 
 def getAllProductInfo():

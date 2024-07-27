@@ -1,4 +1,5 @@
 from connectors.coinbasepro_products import *
+from datetime import datetime as dt
 import sys
 
 if __name__ == '__main__':
@@ -21,10 +22,10 @@ if __name__ == '__main__':
     #              "Example: BTC\n").upper()
     asset_id = '{}-{}'.format(coin,cur)
     # set_usd_accnt_bal = 602.00
-    min_currency_bal = 10
-    min_asset_bal = 1
+    min_currency_bal = 2
+    min_asset_bal = 0.1
 
-    """
+    '''
     ONE   => LIMIT REG NO DEC
     TWO   => LIMIT TAKER NO DEC
     THREE => LIMIT REG DEC
@@ -34,7 +35,7 @@ if __name__ == '__main__':
     SEVEN => MARKET REG DEC
     EIGHT => MARKET TAKER DEC
 
-    """
+    '''
     buy_order_type = sys.argv[7].upper()
     sell_order_type = sys.argv[8].upper()
     select_limit_buy_order = sys.argv[9].lower()
@@ -42,7 +43,7 @@ if __name__ == '__main__':
     
     delay = int(sys.argv[11])
     count = 0
-    fee = 0.0041
+    fee = 0.0043
     # float(input("Enter fee percentage.\nExample: 0.0025\n"))
     # int(input("Please enter the number of seconds you choose to wait before checking\n"
     #                   "to buy/sell again: "))
@@ -51,12 +52,13 @@ if __name__ == '__main__':
     flld_buy_ordr = {}
     flld_sell_ordr = {}
 
-    if select_limit_buy_order in ['true', 'false'] and select_limit_buy_order == 'true':
+
+    if select_limit_buy_order == 'true':
         select_limit_buy_order = True
     else:
         select_limit_buy_order = False
 
-    if select_limit_sell_order in ['true', 'false'] and select_limit_sell_order == 'true':
+    if select_limit_sell_order == 'true':
         select_limit_sell_order = True
     else:
         select_limit_sell_order = False
@@ -65,6 +67,20 @@ if __name__ == '__main__':
     while True:
         
         price = float(getProductInfo(asset_id)['price'])
+
+        for order in coinbase_request('GET', '/api/v3/brokerage/orders/historical/fills', '')['fills']:
+
+            if last_buy_ordr and order['order_id'] == last_buy_ordr['order_id']:
+                flld_buy_ordr = order
+
+                with open(f'[{dt.now().strftime("%b_%d_%Y")}]filled_buy_order.json', 'w') as file:
+                    json.dump(flld_buy_ordr, file, indent=6)
+
+            if last_sell_ordr and order['order_id'] == last_sell_ordr['order_id']:
+                flld_sell_ordr = order
+
+                with open(f'[{dt.now().strftime("%b_%d_%Y")}]filled_sell_order.json', 'w') as file:
+                    json.dump(flld_sell_ordr, file, indent=6)
             
         if price <= buy_price:
             # if price < buy_price:
@@ -72,19 +88,10 @@ if __name__ == '__main__':
             #     sell_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(buy_price * (sell_price_mltplr)))
             for wallet in coinbase_request('GET', '/api/v3/brokerage/accounts?limit=250', '')['accounts']:
                 if wallet['currency'] == cur and float(wallet['available_balance']['value']) >= min_currency_bal:
-                    if last_buy_ordr and not last_buy_ordr['order_id'] == '0123456789':
-                        print(f"There is already a buy order open for {coin}!\nOrder amount: {last_buy_ordr['size']}")
-                        print(f'Buy price: ${str(buy_price)}')
-                        print(f'Sell price: ${str(sell_price)}')
-                        if delay == 1:
-                            print(f'Checking again in {str(delay)} second...')
-                        else:
-                            print(f'Checking again in {str(delay)} seconds...')
-                        print('---------------------------------------------\n')
-                        break
+
                     print('Buying ' + coin + '!')
 
-                    """
+                    '''
                     ONE   => LIMIT REG NO DEC
                     TWO   => LIMIT TAKER NO DEC
                     THREE => LIMIT REG DEC
@@ -94,7 +101,7 @@ if __name__ == '__main__':
                     SEVEN => MARKET REG DEC
                     EIGHT => MARKET TAKER DEC
 
-                    """
+                    '''
 
                     if buy_order_type == 'ONE':
                         # For Limit Buy Orders That Don't Allow Decimal Sizes
@@ -134,17 +141,29 @@ if __name__ == '__main__':
                     if select_limit_buy_order:
                         # Limit Buy Order (Max)
                         if coin in spcl_assts:
-                            last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur, '{:.8f}'.format(price))
+                            last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur, ('{:.' + str(price_dec_plcs) + 'f}').format(price))
+
+                            with open(f'[{dt.now().strftime("%b_%d_%Y")}]last_buy_order.json', 'w') as file:
+
+                                json.dump(last_buy_ordr, file, indent=6)
                         else:
                             last_buy_ordr = placeLimitOrder(Side.BUY.name, asset_id, fiat_cur, str(price))
+
+                            with open(f'[{dt.now().strftime("%b_%d_%Y")}]last_buy_order.json', 'w') as file:
+
+                                json.dump(last_buy_ordr, file, indent=6)
                     elif not select_limit_buy_order:
                         # Market Buy Order
                         last_buy_ordr = placeMarketBuyOrder(Side.BUY.name, asset_id, fiat_cur)
+
+                        with open(f'[{dt.now().strftime("%b_%d_%Y")}]last_buy_order.json', 'w') as file:
+
+                            json.dump(last_buy_ordr, file, indent=6)
                     
                     # Stop Loss Order (Max)
                     # last_buy_ordr = placeStopOrder(Side.BUY.name, asset_id, fiat_cur, str(price * 0.975), str(price), stp_dirctn)
 
-                    print(last_buy_ordr)
+                    # print(last_buy_ordr)
                     print(f'Buy price: ${str(buy_price)}')
                     print(f'Sell price: ${str(sell_price)}')
                     if delay == 1:
@@ -166,7 +185,10 @@ if __name__ == '__main__':
                             print('---------------------------------------------\n')
                             count += 1
                         else:
-                            print('The market is trending downwards')
+                            if price == buy_price:
+                                print('The market is not trending upards or downwards')
+                            else:
+                                print('The market is trending downwards')
                             print(f'Buy price: ${str(buy_price)}')
                             print(f'Sell price: ${str(sell_price)}')
                             if delay == 1:
@@ -176,48 +198,23 @@ if __name__ == '__main__':
                             print('---------------------------------------------\n')
 
         elif price >= sell_price:
-            # if not last_buy_ordr:
-            #     last_buy_ordr = {
-            #                         "entry_id": "0123456789",
-            #                         "trade_id": "0123456789",
-            #                         "order_id": "0123456789",
-            #                         "trade_time": "0123456789",
-            #                         "trade_type": "FILL",
-            #                         "price": "0123456789",
-            #                         "size": "0123456789",
-            #                         "commission": "0123456789",
-            #                         "product_id": "ABC-USD",
-            #                         "sequence_timestamp": "0123456789",
-            #                         "liquidity_indicator": "MAKER",
-            #                         "size_in_quote": False,
-            #                         "user_id": "fa018cd4-479c-5a78-b676-533726262bb0",
-            #                         "side": "BUY"
-            #                     }
+
             if price > sell_price:
                 buy_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(price - (price * buy_price_divdr)))
                 sell_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(buy_price * sell_price_mltplr))
 
             for asset in coinbase_request('GET', '/api/v3/brokerage/accounts?limit=250', '')['accounts']:
                 if asset['currency'] == coin and float(asset['available_balance']['value']) >= min_asset_bal:
-                    if last_sell_ordr and not last_sell_ordr['order_id'] == '0123456789':
-                        print(f"There is already a buy order open for {coin}!\nOrder amount: {last_sell_ordr['size']}")
-                        print(f'Buy price: ${str(buy_price)}')
-                        print(f'Sell price: ${str(sell_price)}')
-                        if delay == 1:
-                            print(f'Checking again in {str(delay)} second...')
-                        else:
-                            print(f'Checking again in {str(delay)} seconds...')
-                        print('---------------------------------------------\n')
-                    else:
-                        print('You made a profit! Selling ' + coin + '!')
 
-                    """
+                    print('You made a profit! Selling ' + coin + '!')
+
+                    '''
                     ONE   => REG NO DEC ORDER
                     TWO   => TAKER NO DEC ORDER
                     THREE => REG DEC ORDER
                     FOUR  => TAKER DEC ORDER
 
-                    """
+                    '''
 
                     if sell_order_type == 'ONE':
                         # For Limit/Market Sell Orders That Don't Allow Decimal Values
@@ -237,12 +234,20 @@ if __name__ == '__main__':
                     if select_limit_sell_order:
                         # Limit Sell Order (Max)
                         last_sell_ordr = placeLimitOrder(Side.SELL.name, asset_id, coin_cur, str(price))
+
+                        with open(f'[{dt.now().strftime("%b_%d_%Y")}]last_sell_order.json', 'w') as file:
+
+                            json.dump(last_sell_ordr, file, indent=6)
                     else:
                         # Market Sell Order
                         last_sell_ordr = placeMarketSellOrder(Side.SELL.name, asset_id, coin_cur)
 
+                        with open(f'[{dt.now().strftime("%b_%d_%Y")}]last_sell_order.json', 'w') as file:
+
+                            json.dump(last_sell_ordr, file, indent=6)
+
                     print(coin + ' Available: ' + coin_cur)
-                    print(last_sell_ordr)
+                    # print(last_sell_ordr)
                     print(f'Buy price: ${str(buy_price)}')
                     print(f'Sell price: ${str(sell_price)}')
                     if delay == 1:
@@ -275,4 +280,6 @@ if __name__ == '__main__':
             else:
                 print(f'Checking again in {str(delay)} seconds...')
             print('---------------------------------------------\n')
+        print('The current price is: $' + ('{:.' + str(price_dec_plcs) + 'f}').format(price))
+        print('\n---------------------------------------------\n')
         time.sleep(delay)
