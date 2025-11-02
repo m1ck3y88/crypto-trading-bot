@@ -1,5 +1,7 @@
 from connectors.coinbasepro_products import *
 from datetime import datetime as dt
+import time
+import math
 import sys
 
 if __name__ == '__main__':
@@ -22,8 +24,8 @@ if __name__ == '__main__':
     #              "Example: BTC\n").upper()
     asset_id = '{}-{}'.format(coin,cur)
     # set_usd_accnt_bal = 602.00
-    min_currency_bal = 2
-    min_asset_bal = 0.1
+    min_currency_bal = 1
+    min_asset_bal = 1.0
 
     '''
     ONE   => LIMIT REG NO DEC
@@ -43,7 +45,7 @@ if __name__ == '__main__':
     
     delay = int(sys.argv[11])
     count = 0
-    fee = 0.0043
+    fee = 0.0122
     # float(input("Enter fee percentage.\nExample: 0.0025\n"))
     # int(input("Please enter the number of seconds you choose to wait before checking\n"
     #                   "to buy/sell again: "))
@@ -70,24 +72,29 @@ if __name__ == '__main__':
 
         for order in coinbase_request('GET', '/api/v3/brokerage/orders/historical/fills', '')['fills']:
 
-            if last_buy_ordr and order['order_id'] == last_buy_ordr['order_id']:
+            if last_buy_ordr and order['order_id'] == last_buy_ordr['success_response']['order_id']:
+
                 flld_buy_ordr = order
 
                 with open(f'[{dt.now().strftime("%b_%d_%Y")}]filled_buy_order.json', 'w') as file:
+
                     json.dump(flld_buy_ordr, file, indent=6)
 
-            if last_sell_ordr and order['order_id'] == last_sell_ordr['order_id']:
+            if last_sell_ordr and order['order_id'] == last_sell_ordr['success_response']['order_id']:
+
                 flld_sell_ordr = order
 
                 with open(f'[{dt.now().strftime("%b_%d_%Y")}]filled_sell_order.json', 'w') as file:
+
                     json.dump(flld_sell_ordr, file, indent=6)
             
         if price <= buy_price:
-            # if price < buy_price:
-            #     buy_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(price))
-            #     sell_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(buy_price * (sell_price_mltplr)))
+
             for wallet in coinbase_request('GET', '/api/v3/brokerage/accounts?limit=250', '')['accounts']:
                 if wallet['currency'] == cur and float(wallet['available_balance']['value']) >= min_currency_bal:
+                    if price < buy_price:
+                        buy_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(price))
+                        sell_price = float(('{:.' + str(price_dec_plcs) + 'f}').format(buy_price * (sell_price_mltplr)))
 
                     print('Buying ' + coin + '!')
 
@@ -231,6 +238,8 @@ if __name__ == '__main__':
                         asset_amount = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(asset['available_balance']['value']))
                         coin_cur = ('{:.' + str(amnt_dec_plcs) + 'f}').format(float(asset_amount) - (float(asset_amount) * fee))
 
+                    print(coin + ' Available: ' + coin_cur)
+
                     if select_limit_sell_order:
                         # Limit Sell Order (Max)
                         last_sell_ordr = placeLimitOrder(Side.SELL.name, asset_id, coin_cur, str(price))
@@ -246,8 +255,6 @@ if __name__ == '__main__':
 
                             json.dump(last_sell_ordr, file, indent=6)
 
-                    print(coin + ' Available: ' + coin_cur)
-                    # print(last_sell_ordr)
                     print(f'Buy price: ${str(buy_price)}')
                     print(f'Sell price: ${str(sell_price)}')
                     if delay == 1:
