@@ -151,6 +151,8 @@ Just as the first two scripts are practically copies of each other, this script 
 `main7.py` also starting @lines 286 and 388:
 
 ```python
+            if available_balance <= dynamic_portfolio_balance * 0.75 and available_balance > dynamic_portfolio_balance * 0.5:
+                
                 # if available_balance > initial_portfolio_balance:
 
                 #     delay = float(sys.argv[7])
