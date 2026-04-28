@@ -30,4 +30,5 @@ sandbox.py
 sb_main.py
 system_info.py
 ws_scripts.py
+pyvenv.cfg
 
