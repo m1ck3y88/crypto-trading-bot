@@ -17,6 +17,7 @@ lib64
 main-DESKTOP
 pathlib_scripts
 scripts
+*.json
 clients.py
 coinbase_websocket_gui.ipynb
 crypto_bot_recent_buys.txt
@@ -28,7 +29,6 @@ sandbox.ipynb
 sandbox.py
 sb_main.py
 system_info.py
-websocket_data_[Aug_06_2025].json
 ws_scripts.py
 pyvenv.cfg
 

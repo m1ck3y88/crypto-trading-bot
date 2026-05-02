@@ -54,7 +54,7 @@ The example below shows you what the command line setup might look like for trad
 
     1. For assets without decimal precision (decimal places) in the amount per share set this to `one` or `two`  for limit buy orders or `five` or `six` for market buy orders
 
-        - `python3 main3.py shib 0.00000599 1.05 0.05 5.00 50.00 eight Fasle True 10`
+        - `python3 main3.py shib 0.00000599 1.05 0.05 5.00 50.00 eight two Fasle True 10`
 
     2. For assets with decimal precision (decimal places) in the amount per share set this to `three` or `four` for limit buy orders or `seven` or `eight` for market buy orders
 

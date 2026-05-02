@@ -254,7 +254,7 @@ python main4.py 5 1 1.025 0.025 l3 10.00 0.1 four four True True 1
 python main4.py 5 2 1.025 0.025 mon 10.00 0.1 two two True True 1
 python main4.py 5 2 1.025 0.025 irys 10.00 0.1 two two True True 1
 python main4.py 5 2 1.025 0.025 dbr 10.00 0.1 two two True True 1
-python main4.py 5 2 1.025 0.025 rls 10.00 0.1 two two True True 1
+python main4.py 7 2 1.025 0.025 rls 10.00 0.1 two two True True 1
 python main4.py 5 2 1.025 0.025 bobbob 10.00 0.1 two two True True 1
 python main4.py 4 2 1.025 0.025 recall 10.00 0.1 four four True True 1
 python main4.py 4 2 1.025 0.025 red 10.00 0.1 four four True True 1
@@ -305,3 +305,5 @@ python main4.py 5 2 1.025 0.025 chip 10.00 0.1 two two True True 1
 python main4.py 4 1 1.025 0.025 opg 10.00 0.1 four four True True 1
 python main4.py 5 2 1.025 0.025 kat 10.00 0.1 two two True True 1
 python main4.py 5 1 1.025 0.025 prl 10.00 0.1 four four True True 1
+python main4.py 5 1 1.025 0.025 up 10.00 0.1 four four True True 1
+python main4.py 4 1 1.025 0.025 blend 10.00 0.1 four four True True 1
